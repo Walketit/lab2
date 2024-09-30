@@ -1,5 +1,0 @@
-﻿  Lab22.cpp
-C:\Users\user\source\repos\Lab22\Lab22\Lab22.cpp(125,16): warning C4477: "fprintf": в строке форматирования "%d" требуется аргумент типа "int", но вариативный аргумент "1" имеет тип "double"
-C:\Users\user\source\repos\Lab22\Lab22\Lab22.cpp(203,15): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-C:\Users\user\source\repos\Lab22\Lab22\Lab22.cpp(483,46): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-  Lab22.vcxproj -> C:\Users\user\source\repos\Lab22\x64\Debug\Lab22.exe
