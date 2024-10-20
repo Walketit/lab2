@@ -27,8 +27,8 @@ public:
 	}
 	// Функция для создания нового счета пользователя
 	void create_account(int usr_id, const char* acc_name, double initial_balance, const char* acc_currency) {
-		id = usr_id + 100000;
 		user_id = usr_id;
+		id = user_id + 100000;
 		strncpy(name, acc_name, sizeof(name) - 1);
 		name[sizeof(name) - 1] = '\0';  // Убедимся, что строка завершена нулевым символом
 		balance = initial_balance;
@@ -45,6 +45,10 @@ public:
 		fprintf(file, "Баланс: %fl %s\n", balance, currency);
 		fclose(file);
 
+		char logname[100] = "Cчёт создан: ";
+		strcat(logname, name);
+		logfile_update(user_id, logname);
+
 	}
 
 	// Функция для отображения счета по его идентификатору (в дальнейшем данные будут считываться из базы данных)
@@ -53,6 +57,23 @@ public:
 		printf("Название счета: %s\n", name);
 		printf("Баланс: %.2f %s\n", balance, currency);
 
+	}
+
+	void set_value(int type, double value) {
+		if (type == 0) {
+			balance += value;
+			return;
+		}
+		if (type == 1) {
+			balance -= value;
+			return;
+		}
+		printf("Error");
+		return;
+	}
+
+	int get_user_id() {
+		return user_id;
 	}
 
 	~Account() {
@@ -68,12 +89,12 @@ private:
 	char email[100];        // Адрес электронной почты
 	char password[100];     // Пароль
 	int is_admin;           // Флаг администратора (0 - обычный пользователь, 1 - администратор)
-	
+
 public:
 	Account account;
 	// Конструктор
 	User(int usr_id, const char* usr_name, const char* usr_email, const char* usr_password, int admin_flag,
-		double initial_balance, const char* acc_currency) 
+		double initial_balance, const char* acc_currency)
 		: account(usr_id, "Main", initial_balance, acc_currency) {
 		create_user(usr_id, usr_name, usr_email, usr_password, admin_flag);
 		printf("==Работа Конструктора==");
@@ -100,7 +121,13 @@ public:
 		else fprintf(file, "Статус: Юзер\n");
 		fclose(file);
 
+		logfile_create(id);
+		logfile_update(id, "Профиль создан");
 	}
+
+	int get_user_id() {
+		return id;
+	};
 
 	// Функция для вывода информации о пользователе
 	void print_user() {
@@ -115,7 +142,6 @@ public:
 	}
 };
 
-// Доделать
 class Transaction {
 private:
 	int id;                 // Уникальный идентификатор транзакции
@@ -124,7 +150,24 @@ private:
 	char name[100];         // Имя транзакции
 	double amount;          // Сумма транзакции
 public:
-	
+	Transaction() {
+
+	}
+
+	// Функция для выполнения транзакции
+	void change_value(Account account, int type, int value) {
+		account.set_value(type, value);
+		if (type == 0) {
+			logfile_update(account.get_user_id(), "Зачисление: " + char(value));
+		}
+
+		if (type == 1) {
+			logfile_update(account.get_user_id(), "Списание: " + char(value));
+		}
+		return;
+
+	}
+
 };
 
 class CurrencyChange {
@@ -139,7 +182,7 @@ public:
 
 	// Функция для установки обменного курса
 	void setCurrencyChange(const char* request) {
-		
+
 		FILE* file = fopen("CurrencyRate.txt", "r");
 		if (!file) {
 			printf("Ошибка открытия файла CurrencyRate.txt");
@@ -148,9 +191,6 @@ public:
 
 		char line[128];
 		while (fgets(line, sizeof(line), file)) {
-			char code[7];
-			float rate;
-			char name[50];
 
 			char* token = strtok(line, ",");
 			if (token) {
@@ -175,6 +215,7 @@ public:
 				rate = rate;
 				fclose(file);
 			}
+			return;
 		}
 		printf("Выбранный обменный курс не найден.");
 		exit(1);
@@ -224,6 +265,14 @@ public:
 	const char* getFullDate() const {
 		return full_date;
 	}
+
+	// Функция для парсинга строки даты и времени
+	void parse_date(const char* date_str, Time* time) {
+		sscanf(date_str, "%4s-%2s-%2s %2s:%2s:%2s",
+			time->year, time->month, time->day,
+			time->hour, time->min, time->sec);
+		strcpy(time->full_date, date_str);
+	}
 };
 
 class Goal {
@@ -234,16 +283,18 @@ private:
 	float current_amount;   // Текущая сумма
 	char description[500];  // Описание цели
 public:
-	Goal(const char* name, float target_amount, float current_ammount, const char* content) {
-		create_goal(name, target_amount, current_ammount, content);
+	Goal(User user, const char* name, float target_amount, float current_ammount, const char* content) {
+		create_goal(user, name, target_amount, current_ammount, content);
 	}
 
 	// Функция для создания цели
-	void create_goal(const char* name, float target_amount, float current_ammount, const char* content) {
+	void create_goal(User user, const char* name, float target_amount, float current_ammount, const char* content) {
+		user_id = user.get_user_id();
 		strcpy(this->name, name);
 		this->current_amount = current_ammount;
 		this->target_amount = target_amount;
 		strcpy(this->description, content);
+		logfile_update(user_id, "Создана цель");
 
 	}
 
@@ -263,11 +314,11 @@ private:
 	time_t updated_at;      // Временная метка последнего обновления заметки
 	int category;           // Категория заметки (например, 1 - покупки, 2 - вклады, 3 - финансовые идеи, и т.д.)
 public:
-	Note(const char* title, const char* content, int category) {
-		create_note(title, content, category);
+	Note(User user, const char* title, const char* content, int category) {
+		create_note(user, title, content, category);
 	};
 
-	void create_note(const char* title, const char* content, int category) {
+	void create_note(User user,const char* title, const char* content, int category) {
 		strcpy(this->title, title);
 		strcpy(this->content, content);
 		this->category = category;
@@ -275,6 +326,7 @@ public:
 		FILE* file = fopen(strcat(this->title, ".txt"), "w");
 		fputs(content, file);
 		fclose(file);
+		logfile_update(user.get_user_id(), "Создана заметка");
 
 	}
 
@@ -282,19 +334,19 @@ public:
 		printf("Заметка: %s\n", title);
 		printf("%s", content);
 	}
-	
+
 	~Note() {
 		printf("==Работа Деструктора==");
 	}
 };
-// Доделать
-class Logs {  
+
+class Logs {
 private:
 	char name[100];         // Название операции
 	Time date;            // Дата операции
 public:
 	Logs(int id) {
-		logfile_create(id);
+
 	}
 	// Функция для создания логфайла
 	void logfile_create(int id) {
@@ -307,7 +359,7 @@ public:
 		fclose(file);
 	}
 	// Функция для внесения лога в логфайл
-	void logfile_update(int id, const char* name) {
+	void logfile_update(int id, char* name) {
 		Time currentTime;
 		char mes[150];
 		strcpy(mes, name);
@@ -327,6 +379,47 @@ public:
 		else printf("Error");
 		return;
 	}
+
+	// Функция для считывания и вывода логов
+	void read_logs(User user) {
+		char filename[50] = "logs";
+		char str_id[3];
+		sprintf(str_id, "%d", user.get_user_id());
+		strcat(filename, str_id);
+		strcat(filename, ".txt");
+		FILE* file = fopen(filename, "r");
+		if (file == NULL) {
+			printf("Ошибка открытия файла");
+			return;
+		}
+
+		char line[256];
+		printf("История операций:\n\n");
+
+		while (fgets(line, sizeof(line), file)) {
+			// Удаляем символ новой строки, если он есть
+			line[strcspn(line, "\n")] = '\0';
+
+			// Разбиваем строку на две части: название операции и дату
+			char* operation = strtok(line, "|");
+			char* date_str = strtok(NULL, "|");
+
+			if (operation != NULL && date_str != NULL) {
+				strncpy(name, operation, sizeof(name) - 1);
+				name[sizeof(name) - 1] = '\0'; // Убедимся, что строка завершена нулевым символом
+
+				date.parse_date(date_str, &date);
+
+				// Выводим данные
+				printf("Название операции: %s\n", name);
+				printf("Дата: %s\n", date.getFullDate());
+				printf("-----------------------------\n");
+			}
+		}
+
+		fclose(file);
+	}
+
 
 
 };
@@ -350,11 +443,11 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	int user_amount = 3;
-	User** users = new User*[user_amount];
+	User** users = new User * [user_amount];
 	users[0] = new User(1, "John", "john.doe@example.com", "password123", 0, 0.0, "RUB");
 	users[1] = new User(2, "Jane Smith", "jane.smith@example.com", "password456", 1, 220.0, "EUR");
 	users[2] = new User(3, "Alice Johnson", "alice.johnson@example.com", "password789", 0, 100.0, "USD");
-	
+
 	for (int i = 0; i < user_amount; i++) {
 		users[i]->print_user();
 		printf("\n");
@@ -366,4 +459,12 @@ int main()
 		delete users[i];
 	}
 	delete[] users;
+}
+
+void logfile_update(int id, const char* name)
+{
+}
+
+void logfile_create(int id)
+{
 }
