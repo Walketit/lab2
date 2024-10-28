@@ -204,8 +204,6 @@ public:
 		std::cout << "Статус: " << (is_admin ? "Администратор" : "Юзер") << std::endl;
 	}
 
-	~User() {
-	}
 };
 
 class Account {
@@ -269,9 +267,6 @@ public:
 
 	User get_user() {
 		return user;
-	}
-
-	~Account() {
 	}
 };
 
@@ -437,9 +432,6 @@ public:
 		std::cout << content << std::endl;
 	}
 
-	~Note() {
-		printf("==Работа Деструктора==");
-	}
 };
 
 //
@@ -486,6 +478,45 @@ int main()
 
 	Note note1(user2, "Список продуктов", "Купить молоко,хлеб,колбасу", 1);
 	note1.print_note();
+
+	logs->read_logs(1);
+	logs->read_logs(2);
+
+	// Работа с динамическим массивом объектов класса
+	int numUsers = 3;
+	User* users = new User[numUsers]{
+			User{3, "Layla", "Layla1999@gmail.com", "asd", 0, *logs},
+			User{4, "Matt", "MattSmith@gmail.com", "asdzxc", 1, *logs},
+			User{5, "Лео", "Messi@gmail.com", "111111", 0, *logs}
+	};
+
+	std::cout << "\nДинамический список объектов:\n";
+	for (int i = 0; i < numUsers; ++i) {
+		users[i].print_user();
+		std::cout << "\n";
+	}
+
+	delete[] users;
+
+	// Работа с массивом динамических объектов класса
+	int numGoals = 2;
+	Goal** goals = new Goal * [numGoals];
+	goals[0] = new Goal(user1, "Квартира", 500000000.0, 0.0, "Мечта");
+	goals[1] = new Goal(user1, "Playstation 5", 65000.0, 0.0, "Купить на новогодних скидках");
+
+	std::cout << "\nСписок Динамических объектов:\n";
+	for (int i = 0; i < numGoals; ++i) {
+		goals[i]->print_goal();
+		std::cout << "\n";
+	}
+
+	for (int i = 0; i < numGoals; ++i) {
+		delete goals[i];
+	}
+	delete[] goals;
+
+
+	return 0;
 }
 
 void logfile_update(int id, std::string name)
