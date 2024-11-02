@@ -2,35 +2,35 @@
 #include <Windows.h>
 #include <iostream>
 #include <time.h>
-#include <stdio.h>
+#include <io.h>
 #include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
 #include <string>
+#include <vector>
+
+using namespace std;
 
 void logfile_create(int id);
-void logfile_update(int id, std::string name);
+void logfile_update(int id, string name);
 
 
 //
-// РљР»Р°СЃСЃС‹
+// Классы
 //
 
 class Time {
 private:
-	char hour[3];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С‡Р°СЃР°
-	char min[3];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ РјРёРЅСѓС‚С‹
-	char sec[3];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЃРµРєСѓРЅРґС‹
-	char day[3];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ РґРЅСЏ
-	char month[3];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ РјРµСЃСЏС†Р°
-	char year[5];			// РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ РіРѕРґР°
-	char full_date[22];     // РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ РїРѕР»РЅРѕР№ РґР°С‚С‹
+	char hour[3];			// Переменная для часа
+	char min[3];			// Переменная для минуты
+	char sec[3];			// Переменная для секунды
+	char day[3];			// Переменная для дня
+	char month[3];			// Переменная для месяца
+	char year[5];			// Переменная для года
+	char full_date[22];     // Переменная для полной даты
 public:
-	Time() {
-		current_time();
-	}
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
+	// Функция для получения текущего времени
 	void current_time() {
 		time_t timen;
 		struct tm* timeinfo;
@@ -45,17 +45,18 @@ public:
 		strftime(full_date, 22, "|%Y-%m-%d %H:%M:%S|", timeinfo);
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
+	// Функция вывода текущего времени
 	void print_current_time() {
 		current_time();
-		printf("РЎРµРіРѕРґРЅСЏ: %s-%s-%s\n", day, month, year);
-		printf("Р’СЂРµРјСЏ: %s:%s:%s\n\n", hour, min, sec);
+		printf("Сегодня: %s-%s-%s\n", day, month, year);
+		printf("Время: %s:%s:%s\n\n", hour, min, sec);
 	}
-	const char* getFullDate() const {
+	const char* get_full_date() {
+		current_time();
 		return full_date;
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїР°СЂСЃРёРЅРіР° СЃС‚СЂРѕРєРё РґР°С‚С‹ Рё РІСЂРµРјРµРЅРё
+	// Функция для парсинга строки даты и времени
 	void parse_date(const char* date_str, Time* time) {
 		sscanf(date_str, "%4s-%2s-%2s %2s:%2s:%2s",
 			time->year, time->month, time->day,
@@ -66,40 +67,40 @@ public:
 
 class Logs {
 private:
-	std::string name;         // РќР°Р·РІР°РЅРёРµ РѕРїРµСЂР°С†РёРё
-	Time date;            // Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё
+	string name;         // Название операции
+	Time time;            // Дата операции
 public:
-	Logs() : name(""), date() {};
+	Logs() : name(""), time() {};
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ Р»РѕРіС„Р°Р№Р»Р°
+	// Функция для создания логфайла
 	void logfile_create(int id) {
-		name = "logs" + std::to_string(id);
-		std::ofstream file(name + ".txt");
+		name = "logs" + to_string(id);
+		ofstream file(name + ".txt");
 		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°!");
+			printf("Ошибка создания файла!");
 			exit(1);
 		}
 		file.close();
 	}
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІРЅРµСЃРµРЅРёСЏ Р»РѕРіР° РІ Р»РѕРіС„Р°Р№Р»
-	void logfile_update(int id, std::string name) {
-		std::string mes = name;
-		mes += date.getFullDate();
+	// Функция для внесения лога в логфайл
+	void logfile_update(int id, string name) {
+		time.current_time();
+		string mes = name + time.get_full_date();
 
-		name = "logs" + std::to_string(id);
-		std::ofstream file(name + ".txt", std::ios::app);
+		name = "logs" + to_string(id);
+		ofstream file(name + ".txt", ios::app);
 		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°!");
+			printf("Ошибка создания файла!");
 			exit(1);
 		}
 
-		file << mes;
+		file << mes << endl;
 		file.close();
 
 		return;
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃС‡РёС‚С‹РІР°РЅРёСЏ Рё РІС‹РІРѕРґР° Р»РѕРіРѕРІ
+	// Функция для считывания и вывода логов
 	void read_logs(int id) {
 		char filename[50] = "logs";
 		char str_id[3];
@@ -108,28 +109,28 @@ public:
 		strcat(filename, ".txt");
 		FILE* file = fopen(filename, "r");
 		if (file == NULL) {
-			printf("РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°");
+			printf("Ошибка открытия файла");
 			return;
 		}
 
 		char line[256];
-		printf("РСЃС‚РѕСЂРёСЏ РѕРїРµСЂР°С†РёР№:\n\n");
+		printf("История операций:\n\n");
 
 		while (fgets(line, sizeof(line), file)) {
-			// РЈРґР°Р»СЏРµРј СЃРёРјРІРѕР» РЅРѕРІРѕР№ СЃС‚СЂРѕРєРё, РµСЃР»Рё РѕРЅ РµСЃС‚СЊ
+			// Удаляем символ новой строки, если он есть
 			line[strcspn(line, "\n")] = '\0';
 
-			// Р Р°Р·Р±РёРІР°РµРј СЃС‚СЂРѕРєСѓ РЅР° РґРІРµ С‡Р°СЃС‚Рё: РЅР°Р·РІР°РЅРёРµ РѕРїРµСЂР°С†РёРё Рё РґР°С‚Сѓ
+			// Разбиваем строку на две части: название операции и дату
 			char* operation = strtok(line, "|");
 			char* date_str = strtok(NULL, "|");
 
 			if (operation != NULL && date_str != NULL) {
 
-				date.parse_date(date_str, &date);
+				time.parse_date(date_str, &time);
 
-				// Р’С‹РІРѕРґРёРј РґР°РЅРЅС‹Рµ
-				printf("РќР°Р·РІР°РЅРёРµ РѕРїРµСЂР°С†РёРё: %s\n", operation);
-				printf("Р”Р°С‚Р°: %s\n", date.getFullDate());
+				// Выводим данные
+				printf("Название операции: %s\n", operation);
+				printf("Дата: %s\n", time.get_full_date());
 				printf("-----------------------------\n");
 			}
 		}
@@ -137,146 +138,72 @@ public:
 		fclose(file);
 	}
 
-
-
-};
-
-class User {
-private:
-	int id;                 // РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-	std::string name;         // РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-	std::string email;        // РђРґСЂРµСЃ СЌР»РµРєС‚СЂРѕРЅРЅРѕР№ РїРѕС‡С‚С‹
-	std::string password;     // РџР°СЂРѕР»СЊ
-	int is_admin;           // Р¤Р»Р°Рі Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° (0 - РѕР±С‹С‡РЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ, 1 - Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)
-	Logs logs;
-
-public:
-	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
-	User() : id(0), name(""), email(""), password(""), is_admin(0), logs() {};
-
-	User(int id, std::string name, std::string email, std::string password, int is_admin, Logs logs) {
-		create_user(id, name, email, password, is_admin, logs);
-	};
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-	void create_user(int s_id, std::string s_name, std::string s_email, std::string s_password, int s_is_admin, Logs logs) {
-		this->logs = logs;
-		id = s_id;
-		is_admin = s_is_admin;
-		name = s_name;
-		email = s_email;
-		password = s_password;
-
-		std::string filename = "profile";
-		filename += std::to_string(id);
-		std::ofstream file(filename + ".txt");
-		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°!");
-			exit(1);
-		}
-		file << "РРјСЏ: " << name << " (" << id << ")" << std::endl;
-		file << "РџРѕС‡С‚Р°: " << email << std::endl;
-		file << "РџР°СЂРѕР»СЊ: " << password << std::endl;
-		if (is_admin == 1) {
-			file << "РЎС‚Р°С‚СѓСЃ: РђРґРјРёРЅ" << std::endl;
-		}
-		else {
-			file << "РЎС‚Р°С‚СѓСЃ: Р®Р·РµСЂ" << std::endl;
-		}
-		file.close();
-
-		logs.logfile_create(id);
-		logs.logfile_update(id, "РџСЂРѕС„РёР»СЊ СЃРѕР·РґР°РЅ");
-	}
-
-	int get_user_id() {
-		return id;
-	};
-
-	Logs get_logs() {
-		return logs;
-	}
-
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹РІРѕРґР° РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
-	void print_user() {
-		std::cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ #" << id << ":" << std::endl;
-		std::cout << "РРјСЏ: " << name << std::endl;
-		std::cout << "Email: " << email << std::endl;
-		std::cout << "РЎС‚Р°С‚СѓСЃ: " << (is_admin ? "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ" : "Р®Р·РµСЂ") << std::endl;
+	Time get_time() {
+		return time;
 	}
 
 };
 
 class Account {
 private:
-	int id;                 // РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‡РµС‚Р°
-	std::string name;         // РќР°Р·РІР°РЅРёРµ СЃС‡РµС‚Р°
-	std::string currency;       // Р’Р°Р»СЋС‚Р° СЃС‡РµС‚Р° (РЅР°РїСЂРёРјРµСЂ, "USD", "EUR", "RUB")
-	double balance;         // РўРµРєСѓС‰РёР№ Р±Р°Р»Р°РЅСЃ СЃС‡РµС‚Р°
-	User user;
+	int id;                 // Уникальный идентификатор счета
+	string name;         // Название счета
+	string currency;       // Валюта счета (например, "USD", "EUR", "RUB")
+	double balance;         // Текущий баланс счета
 public:
-	Account() : id(0), name(""), currency(""), balance(0.0), user() {};
+	Account() : id(0), name(""), currency(""), balance(0.0) {};
 
-	Account(std::string acc_name, double initial_balance, std::string acc_currency, User user) {
-		create_account(acc_name, acc_currency, initial_balance, user);
+	Account(string acc_name, double initial_balance, string acc_currency) {
+		create_account(acc_name, acc_currency, initial_balance);
 	}
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ СЃС‡РµС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-	void create_account(std::string acc_name, std::string acc_currency, double initial_balance, User user) {
-		this->user = user;
-		id = user.get_user_id() + 100000;
+	// Функция для создания нового счета пользователя
+	void create_account(string acc_name, string acc_currency, double initial_balance) {
 		name = acc_name;
 		balance = initial_balance;
 		currency = acc_currency;
-
-		std::string filename = "account";
-		filename += std::to_string(id);
-		std::ofstream file(name + ".txt");
-		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°!");
-			exit(1);
-		}
-		file << "РЎС‡С‘С‚: " << name << " (" << id << ")" << std::endl;
-		file << "Р’Р»Р°РґРµР»РµС†: " << name << " (" << id << ")" << std::endl;
-		file << "Р‘Р°Р»Р°РЅСЃ: " << balance << " " << currency << std::endl;
-		file.close();
-
-		std::string logname = "CС‡С‘С‚ СЃРѕР·РґР°РЅ: ";
-		logname += name;
-		user.get_logs().logfile_update(user.get_user_id(), logname);
-
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ СЃС‡РµС‚Р° РїРѕ РµРіРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ (РІ РґР°Р»СЊРЅРµР№С€РµРј РґР°РЅРЅС‹Рµ Р±СѓРґСѓС‚ СЃС‡РёС‚С‹РІР°С‚СЊСЃСЏ РёР· Р±Р°Р·С‹ РґР°РЅРЅС‹С…)
+	// Функция для отображения счета по его идентификатору (в дальнейшем данные будут считываться из базы данных)
 	void print_account() {
-		std::cout << "РќР°Р·РІР°РЅРёРµ СЃС‡РµС‚Р°: " << name << std::endl;
-		std::cout << "Р‘Р°Р»Р°РЅСЃ: " << std::fixed << std::setprecision(2) << balance << " " << currency << std::endl;
+		cout << "Название счета: " << name << endl;
+		cout << "Баланс: " << fixed << setprecision(2) << balance << " " << currency << endl;
 
 	}
 
-	void set_value(int type, double value) {
-		if (type == 0) {
-			this->balance += value;
-			return;
+	void deposit(double amount) {
+		balance += amount;
+	}
+
+	void withdraw(double amount) {
+		if (balance >= amount) {
+			balance -= amount;
 		}
-		if (type == 1) {
-			this->balance -= value;
-			return;
+		else {
+			cout << "Insufficient funds!" << endl;
 		}
-		printf("Error");
-		return;
 	}
 
-	User get_user() {
-		return user;
-	}
+	void setBalance(double balance) { this->balance = balance; }
+	void setName(const string& name) { this->name = name; }
+	void setCurrency(const string& currency) { this->currency = currency; }
+	void setId(int id) { this->id = id; }
+
+
+	double getBalance() const { return balance; }
+	string getName() const { return name; }
+	string getCurrency() const { return currency; }
+	int getId() const { return id; }
+
+
 };
 
 class Transaction {
 private:
-	int id;                 // РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С‚СЂР°РЅР·Р°РєС†РёРё
+	int id;                 // Уникальный идентификатор транзакции
 	Account* account;
-	int type;               // Р¤Р»Р°Рі С‚РёРїР° С‚СЂР°РЅР·Р°РєС†РёРё (0 - Р·Р°С‡РёСЃР»РµРЅРёРµ РЅР° СЃС‡РµС‚, 1 - СЃРЅСЏС‚РёРµ СЃРѕ СЃС‡РµС‚Р°)
-	std::string name;         // РРјСЏ С‚СЂР°РЅР·Р°РєС†РёРё
-	double amount;          // РЎСѓРјРјР° С‚СЂР°РЅР·Р°РєС†РёРё
+	int type;               // Флаг типа транзакции (0 - зачисление на счет, 1 - снятие со счета)
+	string name;         // Имя транзакции
+	double amount;          // Сумма транзакции
 public:
 	Transaction() : id(0), account(), type(0), name(""), amount(0.0) {};
 
@@ -292,15 +219,19 @@ public:
 		amount = 0.0;
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ С‚СЂР°РЅР·Р°РєС†РёРё
-	void change_value(std::string name, int type, int value) {
-		account->set_value(type, value);
-		if (type == 0) {
-			account->get_user().get_logs().logfile_update(account->get_user().get_user_id(), "Р—Р°С‡РёСЃР»РµРЅРёРµ: " + std::to_string(value) + "(" + name + ")");
-		}
+	// Функция для выполнения транзакции
+	void change_value(string name, int type, int value) {
+		this->name = name;
+		this->type = type;
+		this->amount = value;
 
-		if (type == 1) {
-			account->get_user().get_logs().logfile_update(account->get_user().get_user_id(), "РЎРїРёСЃР°РЅРёРµ: " + std::to_string(value) + "(" + name + ")");
+		if (type == 0) {
+			account->deposit(amount);
+			cout << "Пополнение на " << amount << ", на счёт " << account->getName() << endl;
+		}
+		else if (type == 1) {
+			account->withdraw(amount);
+			cout << "Списание " << amount << " ,со счёта " << account->getName() << endl;
 		}
 		return;
 
@@ -310,42 +241,42 @@ public:
 
 class CurrencyChange {
 private:
-	std::string code;           // РљРѕРґ РѕР±РјРµРЅР° (РЅР°РїСЂРёРјРµСЂ, "USDRUB")
-	std::string name;          // РџРѕР»РЅРѕРµ РЅР°Р·РІР°РЅРёРµ РѕР±РјРµРЅР° (РЅР°РїСЂРёРјРµСЂ, "РґРѕР»Р»Р°СЂ Рє СЂСѓР±Р»СЋ")
-	float rate;             // РљСѓСЂСЃ РІР°Р»СЋС‚С‹ РїРѕ РѕС‚РЅРѕС€РµРЅРёСЋ Рє Р±Р°Р·РѕРІРѕР№ РІР°Р»СЋС‚
+	string code;           // Код обмена (например, "USDRUB")
+	string name;          // Полное название обмена (например, "доллар к рублю")
+	float rate;             // Курс валюты по отношению к базовой валют
 public:
 	CurrencyChange() : code(""), name(""), rate(0) {};
 
-	CurrencyChange(std::string request) {
-		setCurrencyChange(request);
+	CurrencyChange(string request) {
+		set_сurrency_сhange(request);
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё РѕР±РјРµРЅРЅРѕРіРѕ РєСѓСЂСЃР°
-	void setCurrencyChange(std::string request) {
+	// Функция для установки обменного курса
+	void set_сurrency_сhange(string request) {
 
-		std::ifstream file("CurrencyRate.txt");
+		ifstream file("CurrencyRate.txt");
 		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р° CurrencyRate.txt");
+			printf("Ошибка открытия файла CurrencyRate.txt");
 			exit(1);
 		}
 
-		std::string line;
-		while (std::getline(file, line)) {
-			std::stringstream ss(line);
-			std::string token;
+		string line;
+		while (getline(file, line)) {
+			stringstream ss(line);
+			string token;
 
-			// РџРѕР»СѓС‡Р°РµРј РїРµСЂРІС‹Р№ С‚РѕРєРµРЅ (РєРѕРґ)
-			if (std::getline(ss, token, ',')) {
+			// Получаем первый токен (код)
+			if (getline(ss, token, ',')) {
 				if (request == token) {
 					code = token;
 
-					// РџРѕР»СѓС‡Р°РµРј РІС‚РѕСЂРѕР№ С‚РѕРєРµРЅ (СЃС‚Р°РІРєР°)
-					if (std::getline(ss, token, ',')) {
-						rate = std::stod(token);
+					// Получаем второй токен (ставка)
+					if (getline(ss, token, ',')) {
+						rate = stod(token);
 					}
 
-					// РџРѕР»СѓС‡Р°РµРј С‚СЂРµС‚РёР№ С‚РѕРєРµРЅ (РёРјСЏ)
-					if (std::getline(ss, token, '\n')) {
+					// Получаем третий токен (имя)
+					if (getline(ss, token, '\n')) {
 						name = token;
 					}
 
@@ -353,89 +284,219 @@ public:
 					return;
 				}
 			}
-			printf("Р’С‹Р±СЂР°РЅРЅС‹Р№ РѕР±РјРµРЅРЅС‹Р№ РєСѓСЂСЃ РЅРµ РЅР°Р№РґРµРЅ.");
+			printf("Выбранный обменный курс не найден.");
 			exit(1);
 		}
 	}
-	// Р¤СѓРЅРєС†РёСЏ РѕР±РјРµРЅР° РєСѓСЂСЃР°
+	// Функция обмена курса
 	void change(float amount) {
-		std::cout << "РћР±РјРµРЅ " << name << std::endl;
-		std::cout << std::fixed << std::setprecision(3) << amount << " = " << amount * rate << std::endl;
+		cout << "Обмен " << name << endl;
+		cout << fixed << setprecision(3) << amount << " = " << amount * rate << endl;
 		return;
 	}
 };
 
 class Goal {
 private:
-	std::string name;         // РќР°Р·РІР°РЅРёРµ С†РµР»Рё
-	std::string description;  // РћРїРёСЃР°РЅРёРµ С†РµР»Рё
-	float target_amount;    // Р¦РµР»РµРІР°СЏ СЃСѓРјРјР°
-	float current_amount;   // РўРµРєСѓС‰Р°СЏ СЃСѓРјРјР°
-	User user;
+	string name;         // Название цели
+	string description;  // Описание цели
+	float target_amount;    // Целевая сумма
+	float current_amount;   // Текущая сумма
 public:
-	Goal() : name(""), description(""), target_amount(0), current_amount(0), user() {};
+	Goal() : name(""), description(""), target_amount(0), current_amount(0) {}
 
-	Goal(User user, std::string name, float target_amount, float current_ammount, std::string content) {
-		create_goal(user, name, target_amount, current_ammount, content);
-	}
-
-	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ С†РµР»Рё
-	void create_goal(User user, std::string name, float target_amount, float current_ammount, std::string content) {
+	Goal(string name, float target_amount, float current_ammount, string content) {
 		this->name = name;
 		this->current_amount = current_ammount;
 		this->target_amount = target_amount;
 		this->description = content;
-		user.get_logs().logfile_update(user.get_user_id(), "РЎРѕР·РґР°РЅР° С†РµР»СЊ");
-
 	}
 
-	// Р¤СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° С†РµР»Рё
+	// Функция вывода цели
 	void print_goal() {
-		std::cout << "Р¦РµР»СЊ: " << name << std::endl;
-		std::cout << std::fixed << std::setprecision(0) << current_amount << "/" << target_amount << std::endl;
-		std::cout << "РћРїРёСЃР°РЅРёРµ: " << description << std::endl;
+		cout << "Цель: " << name << endl;
+		cout << fixed << setprecision(0) << current_amount << "/" << target_amount << endl;
+		cout << "Описание: " << description << endl;
 	}
+	// Прибавление к текущей сумме
+	void addToBalance(double amount) {
+		current_amount += amount;
+	}
+	// Проверка достижения цели
+	bool isAchieved() const {
+		return current_amount >= target_amount;
+	}
+
+	string getTitle() const { return name; }
+	string getDescription() const { return description; }
+	double getCurrentBalance() const { return current_amount; }
+	double getTargetAmount() const { return target_amount; }
+
+	void setTitle(const string& title) { this->name = name; }
+	void setDescription(const string& description) { this->description = description; }
+	void setCurrentBalance(double currentBalance) { this->current_amount = current_amount; }
+	void setTargetAmount(double targetAmount) { this->target_amount = target_amount; }
+
 };
 
 class Note {
 private:
-	std::string title;        // Р—Р°РіРѕР»РѕРІРѕРє Р·Р°РјРµС‚РєРё
-	std::string content;      // РЎРѕРґРµСЂР¶Р°РЅРёРµ Р·Р°РјРµС‚РєРё
-	int category;           // РљР°С‚РµРіРѕСЂРёСЏ Р·Р°РјРµС‚РєРё (РЅР°РїСЂРёРјРµСЂ, 1 - РїРѕРєСѓРїРєРё, 2 - РІРєР»Р°РґС‹, 3 - С„РёРЅР°РЅСЃРѕРІС‹Рµ РёРґРµРё, Рё С‚.Рґ.)
-	User user;
+	string title;        // Заголовок заметки
+	string content;      // Содержание заметки
+	string category;           // Категория заметки (например, 1 - покупки, 2 - вклады, 3 - финансовые идеи, и т.д.)
 public:
-	Note() : user(), title(""), content(""), category(0) {};
+	Note() : title(""), content(""), category("") {};
 
-	Note(User user, std::string title, std::string content, int category) {
-		create_note(user, title, content, category);
-	};
-
-	void create_note(User user, std::string title, std::string content, int category) {
+	Note(string title, string content, string category) {
 		this->title = title;
 		this->content = content;
 		this->category = category;
+	};
 
-		std::ofstream file(title + ".txt");
+	void print_note() {
+		cout << "Заметка: " << title << endl;
+		cout << content << endl;
+	}
+
+	string getTitle() const { return title; }
+	string getDescription() const { return content; }
+	string getCategory() const { return category; }
+
+	void setTitle(const string& title) { this->title = title; }
+	void setDescription(const string& description) { this->content = description; }
+	void setCategory(const string& category) { this->category = category; }
+
+};
+
+class User {
+private:
+	int id;                 // Уникальный идентификатор пользователя
+	string name;         // Имя пользователя
+	string email;        // Адрес электронной почты
+	string password;     // Пароль
+	int is_admin;           // Флаг администратора (0 - обычный пользователь, 1 - администратор)
+	Logs logs;
+	vector<Account> accounts;
+	vector<Note> notes;
+	vector<Goal> goals;
+public:
+	// Конструктор
+	User() : id(0), name(""), email(""), password(""), is_admin(0), logs() {};
+	// Конструктор для создания пользователя
+	User(int id, string name, string email, string password, int is_admin, Logs logs) {
+		this->logs = logs;
+		this->id = id;
+		this->is_admin = is_admin;
+		this->name = name;
+		this->email = email;
+		this->password = password;
+
+		string filename = "profile";
+		filename += to_string(id);
+		ofstream file(filename + ".txt");
 		if (!file.is_open()) {
-			printf("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°!");
+			printf("Ошибка создания файла!");
+			exit(1);
+		}
+		file << "Имя: " << name << " (" << id << ")" << endl;
+		file << "Почта: " << email << endl;
+		file << "Пароль: " << password << endl;
+		if (is_admin == 1) {
+			file << "Статус: Админ" << endl;
+		}
+		else {
+			file << "Статус: Юзер" << endl;
+		}
+		file.close();
+
+		logs.logfile_create(id);
+		logs.logfile_update(id, "Профиль создан");
+	};
+
+	void add_account(Account account) {
+		account.setId(id + 100000);
+		string filename = "account";
+		filename += to_string(id);
+		ofstream file(name + ".txt");
+		if (!file.is_open()) {
+			printf("Ошибка создания файла!");
+			exit(1);
+		}
+		file << "Счёт: " << account.getName() << " (" << account.getId() << ")" << endl;
+		file << "Владелец: " << name << " (" << id << ")" << endl;
+		file << "Баланс: " << account.getBalance() << " " << account.getCurrency() << endl;
+		file.close();
+
+		string logname = "Cчёт создан: ";
+		logname += account.getName();
+		logs.logfile_update(id, logname);
+
+		accounts.push_back(account);
+	}
+
+	void displayAccounts() const {
+		cout << "Счета " << name << ":" << endl;
+		for (const auto& account : accounts) {
+			cout << "Счёт: " << account.getName() << endl;
+			cout << "Баланс: " << account.getBalance() << " " << account.getCurrency() << endl;
+		}
+	}
+
+	void add_note(Note note) {
+		ofstream file(note.getTitle() + ".txt");
+		if (!file.is_open()) {
+			printf("Ошибка создания файла!");
 			exit(1);
 		}
 
-		file << content;
+		file << note.getDescription();
 		file.close();
-		user.get_logs().logfile_update(user.get_user_id(), "РЎРѕР·РґР°РЅР° Р·Р°РјРµС‚РєР°");
+		logs.logfile_update(id, "Создана заметка");
 
+		notes.push_back(note);
 	}
 
-	void print_note() {
-		std::cout << "Р—Р°РјРµС‚РєР°: " << title << std::endl;
-		std::cout << content << std::endl;
+	void displayNotes() const {
+		cout << "Записки " << name << ":" << endl;
+		for (const auto& note : notes) {
+			cout << "Записка: " << note.getTitle() << ", Категория: " << note.getCategory() << endl;
+			cout << note.getDescription() << endl;
+		}
+	}
+
+	void add_goal(Goal goal) {
+		string n = "Создана цель: " + goal.getTitle();
+		logs.logfile_update(id, n);
+		goals.push_back(goal);
+	}
+
+	void displayGoals() const {
+		cout << "Цели " << name << ":" << endl;
+		for (const auto& goal : goals) {
+			cout << "Цель: " << goal.getTitle() << ", Текущая сумма: " << goal.getCurrentBalance()
+				<< ", Целевая сумма: " << goal.getTargetAmount() << endl;
+		}
+	}
+
+	// Функция для вывода информации о пользователе
+	void print_user() {
+		cout << "Пользователь #" << id << ":" << endl;
+		cout << "Имя: " << name << endl;
+		cout << "Email: " << email << endl;
+		cout << "Статус: " << (is_admin ? "Администратор" : "Юзер") << endl;
+	}
+
+	Account* getAccount(int index) {
+		if (index >= 0 && index < accounts.size()) {
+			return &accounts[index];
+		}
+		return nullptr;
 	}
 
 };
 
 //
-// Р”РµРјРѕРЅСЃС‚СЂР°С†РёСЏ СЂР°Р±РѕС‚С‹
+// Демонстрация работы
 //
 
 int main()
@@ -444,70 +505,81 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
-	Time time;
-	time.print_current_time();
 	Logs* logs = new Logs();
+	logs->get_time().print_current_time();
 
 	User user1(1, "John", "Johnmail@gmail.com", "123", 0, *logs);
-	User user2(2, "Leon", "Leonmail@gmail.com", "321", 0, *logs);
 
 	user1.print_user();
-	user2.print_user();
 
-	Account account1("main", 0.0, "RUB", user1);
-	Account account2("РћСЃРЅРѕРІР°", 100.0, "EUR", user2);
+	Account account1("main", 0.0, "RUB");
+	Account account2("Основа", 100.0, "EUR");
 
-	account1.print_account();
-	account2.print_account();
+	user1.add_account(account1);
+	user1.add_account(account2);
 
-	Transaction transaction(1, &account1);
-	transaction.change_value("РЎС‚РёРїРµРЅРґРёСЏ", 0, 5000);
+	user1.displayAccounts();
 
-	transaction.set_transaction(2, &account2);
-	transaction.change_value("РћРїР»Р°С‚Р° Р·Р° РїРѕРґРїРёСЃРєСѓ", 1, 5);
+	cout << '\n' << endl;
 
-	account1.print_account();
-	account2.print_account();
+	Transaction transaction(1, user1.getAccount(0));
+	transaction.change_value("Стипендия", 0, 5000);
+
+	transaction.set_transaction(2, user1.getAccount(1));
+	transaction.change_value("Оплата за подписку", 1, 5);
+
+	cout << '\n' << endl;
+
+	user1.displayAccounts();
+
+	cout << '\n' << endl;
 
 	CurrencyChange cur;
-	cur.setCurrencyChange("RUBEUR");
+	cur.set_сurrency_сhange("RUBEUR");
 	cur.change(1000);
 
-	Goal goal1(user1, "BMW M5", 5000000.0, 0.0, "РҐРѕС‡Сѓ РјР°С€РёРЅСѓ");
-	goal1.print_goal();
+	cout << '\n' << endl;
 
-	Note note1(user2, "РЎРїРёСЃРѕРє РїСЂРѕРґСѓРєС‚РѕРІ", "РљСѓРїРёС‚СЊ РјРѕР»РѕРєРѕ,С…Р»РµР±,РєРѕР»Р±Р°СЃСѓ", 1);
-	note1.print_note();
+	Goal goal1("BMW M5", 5000000.0, 0.0, "Хочу машину");
+	user1.add_goal(goal1);
+	user1.displayGoals();
+
+	cout << '\n' << endl;
+
+	Note note1("Список продуктов", "Купить молоко,хлеб,колбасу", "Покупки");
+	user1.add_note(note1);
+	user1.displayNotes();
+
+	cout << "\n";
 
 	logs->read_logs(1);
-	logs->read_logs(2);
 
-	// Р Р°Р±РѕС‚Р° СЃ РґРёРЅР°РјРёС‡РµСЃРєРёРј РјР°СЃСЃРёРІРѕРј РѕР±СЉРµРєС‚РѕРІ РєР»Р°СЃСЃР°
+	// Работа с динамическим массивом объектов класса
 	int numUsers = 3;
 	User* users = new User[numUsers]{
 			User{3, "Layla", "Layla1999@gmail.com", "asd", 0, *logs},
 			User{4, "Matt", "MattSmith@gmail.com", "asdzxc", 1, *logs},
-			User{5, "Р›РµРѕ", "Messi@gmail.com", "111111", 0, *logs}
+			User{5, "Лео", "Messi@gmail.com", "111111", 0, *logs}
 	};
 
-	std::cout << "\nР”РёРЅР°РјРёС‡РµСЃРєРёР№ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ:\n";
+	cout << "\nДинамический список объектов:\n";
 	for (int i = 0; i < numUsers; ++i) {
 		users[i].print_user();
-		std::cout << "\n";
+		cout << "\n";
 	}
 
 	delete[] users;
 
-	// Р Р°Р±РѕС‚Р° СЃ РјР°СЃСЃРёРІРѕРј РґРёРЅР°РјРёС‡РµСЃРєРёС… РѕР±СЉРµРєС‚РѕРІ РєР»Р°СЃСЃР°
+	// Работа с массивом динамических объектов класса
 	int numGoals = 2;
 	Goal** goals = new Goal * [numGoals];
-	goals[0] = new Goal(user1, "РљРІР°СЂС‚РёСЂР°", 500000000.0, 0.0, "РњРµС‡С‚Р°");
-	goals[1] = new Goal(user1, "Playstation 5", 65000.0, 0.0, "РљСѓРїРёС‚СЊ РЅР° РЅРѕРІРѕРіРѕРґРЅРёС… СЃРєРёРґРєР°С…");
+	goals[0] = new Goal("Квартира", 500000000.0, 0.0, "Мечта");
+	goals[1] = new Goal("Playstation 5", 65000.0, 0.0, "Купить на новогодних скидках");
 
-	std::cout << "\nРЎРїРёСЃРѕРє Р”РёРЅР°РјРёС‡РµСЃРєРёС… РѕР±СЉРµРєС‚РѕРІ:\n";
+	cout << "\nСписок Динамических объектов:\n";
 	for (int i = 0; i < numGoals; ++i) {
 		goals[i]->print_goal();
-		std::cout << "\n";
+		cout << "\n";
 	}
 
 	for (int i = 0; i < numGoals; ++i) {
@@ -519,7 +591,7 @@ int main()
 	return 0;
 }
 
-void logfile_update(int id, std::string name)
+void logfile_update(int id, string name)
 {
 }
 
