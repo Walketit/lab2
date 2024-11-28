@@ -2,9 +2,14 @@
 #include "User.h"
 #include <fstream>
 
-User::User(int id, string name, string email, string password, int is_admin, Logs logs) {
+class User;
+// Инициализация статического поля
+int User::userCount = 0;
+
+User::User(string name, string email, string password, int is_admin, Logs logs) {
     this->logs = logs;
-    this->id = id;
+    this->id = userCount;
+    userCount++;
     this->is_admin = is_admin;
     this->name = name;
     this->email = email;
@@ -32,25 +37,66 @@ User::User(int id, string name, string email, string password, int is_admin, Log
     logs.logfile_update(id, "Профиль создан");
 }
 
-void User::add_account(Account account) {
-    account.setId(id + 100000);
-    string filename = "account";
-    filename += to_string(id);
-    ofstream file(name + ".txt");
-    if (!file.is_open()) {
-        printf("Ошибка создания файла!");
-        exit(1);
+User::User(const User& other) {
+    id = other.id;
+    name = other.name;
+    email = other.email;
+    password = other.password;
+    is_admin = other.is_admin;
+    logs = other.logs;
+    accounts = other.accounts;
+    notes = other.notes;
+    goals = other.goals;
+}
+
+User& User::operator=(const User& other) {
+    if (this == &other) {
+        return *this;
     }
-    file << "Счёт: " << account.getName() << " (" << account.getId() << ")" << endl;
-    file << "Владелец: " << name << " (" << id << ")" << endl;
-    file << "Баланс: " << account.getBalance() << " " << account.getCurrency() << endl;
-    file.close();
+    id = other.id;
+    name = other.name;
+    email = other.email;
+    password = other.password;
+    is_admin = other.is_admin;
+    logs = other.logs;
+    accounts = other.accounts;
+    notes = other.notes;
+    goals = other.goals;
+    return *this;
+}
 
-    string logname = "Cчёт создан: ";
-    logname += account.getName();
-    logs.logfile_update(id, logname);
+bool operator==(const User& lhs, const User& rhs)
+{
+    return lhs.name == rhs.name;
+}
 
-    accounts.push_back(account);
+void User::add_account(Account account)
+{
+    if (account.getName().empty()) {
+        throw invalid_argument("Account name cannot be empty");
+    }
+    try {
+        account.setId(id + 100000);
+        string filename = "account";
+        filename += to_string(id);
+        ofstream file(name + ".txt");
+        if (!file.is_open()) {
+            throw runtime_error("Ошибка! Неверное имя файла!");
+        }
+        file << "Счёт: " << account.getName() << " (" << account.getId() << ")" << endl;
+        file << "Владелец: " << name << " (" << id << ")" << endl;
+        file << "Баланс: " << account.getBalance() << " " << account.getCurrency() << endl;
+        file.close();
+
+        string logname = "Cчёт создан: ";
+        logname += account.getName();
+        logs.logfile_update(id, logname);
+
+        accounts.push_back(account);
+    }
+    catch (const invalid_argument& e) {
+        cerr << "Error: " << e.what() << endl;
+    }
 }
 
 void User::displayAccounts() const {
@@ -97,16 +143,66 @@ void User::displayGoals() const {
     }
 }
 
-void User::print_user() {
+void User::print_user() const {
     cout << "Пользователь #" << id << ":" << endl;
     cout << "Имя: " << name << endl;
     cout << "Email: " << email << endl;
     cout << "Статус: " << (is_admin ? "Администратор" : "Юзер") << endl;
 }
 
-Account* User::getAccount(int index) {
-    if (index >= 0 && index < accounts.size()) {
-        return &accounts[index];
+Account* User::getAccount(int id) {
+    if (id >= 0 && id < accounts.size()) {
+        return &accounts[id];
     }
     return nullptr;
 }
+
+Account& User::getAccountRef(int id) {
+    if (id >= 0 && id < accounts.size()) {
+        return accounts[id];
+    }
+    throw out_of_range("Недопустимый id");
+}
+
+void User::friend_add_account(Account& account)
+{
+    try {
+        account.id = this->id + 100000;
+        string filename = "account";
+        filename += to_string(id);
+        ofstream file(name + ".txt");
+        if (!file.is_open()) {
+            throw runtime_error("Ошибка создания файла!");
+        }
+        file << "Счёт: " << account.name << " (" << account.id << ")" << endl;
+        file << "Владелец: " << name << " (" << id << ")" << endl;
+        file << "Баланс: " << account.balance << " " << account.currency << endl;
+        file.close();
+
+        string logname = "Cчёт создан: ";
+        logname += account.name;
+        logs.logfile_update(id, logname);
+
+        accounts.push_back(account);
+    }
+    catch (const invalid_argument& e) {
+        cerr << "Error: " << e.what() << endl;
+    }
+}
+
+int User::getUserCount()
+{
+    return userCount;
+}
+
+string User::getFullNameWithId() const
+{
+    return name + " (" + to_string(id) + ")";
+}
+
+bool User::containsName(const string& substring) const
+{
+    return name.find(substring) != string::npos;
+}
+
+
