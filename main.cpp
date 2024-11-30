@@ -21,31 +21,30 @@ int main()
 	logs->get_time().print_current_time();
 
 	User user1("Alex", "Alex@gmail.com", "123321", 1, *logs);
-	User user2("Bob", "bob@example.com", "password456", 1, *logs);
+    User user2("Bob", "bob@example.com", "password456", 1, *logs);
+    
+    // Будет выброшено исключение пустого имени
+    cout << endl << "Будет выброшено исключение пустого имени" << endl;
+    User user3("", "adadsd@example.com", "23233323", 1, *logs);
 
 	// Добавление счетов
 	Account account1("Копилка", 1000.0, "USD");
-	Account account2("Карманные деньги", 500.0, "USD");
+	Account account2("", 500.0, "USD");
 	user1.add_account(account1);
 	
     // Дружественная функция
     user2.friend_add_account(account2);
 
     // Перегрузка оператора сравнения
+    cout << endl << "Перегрузка оператора сравнения" << endl;
     if (user1 == user2) {
         cout << "У пользователей одинаковое имя!" << endl;
     }
     else
         cout << "У пользователей разные имена!" << endl;
 
-
-	// Отображение информации о пользователе
-	user1.print_user();
-	user1.displayAccounts();
-	user1.displayNotes();
-	user1.displayGoals();
-
     // Возврат значения через указатель
+    cout << endl << "Возврат значения через указатель" << endl;
     Account* accountPtr = user1.getAccount(0);
     if (accountPtr != nullptr) {
         cout << "Счёт: " << accountPtr->getName() << endl;
@@ -56,8 +55,9 @@ int main()
     }
 
     // Возврат значения через ссылку + (try - catch)
+    cout << endl << "Возврат значения через ссылку + (try - catch)" << endl;
     try {
-        Account& accRef = user1.getAccountRef(1);
+        Account& accRef = user1.getAccountRef(0);
         cout << "Счёт: " << accRef.getName() << endl;
         cout << "Баланс счёта: " << accRef.getBalance() << endl;
     }
@@ -66,14 +66,22 @@ int main()
     }
 
     // Конструктор копии и оператор присваивания
-    User user3 = user1; // Конструктор копии
-    user3.print_user();
-
-    User user4;
-    user4 = user2; // Оператор присваивания
+    cout << endl << "Конструктор копии (Вызывается описания user4, который имеет такие же данные как user1)" << endl;
+    User user4 = user1; // Конструктор копии
     user4.print_user();
 
+    cout << endl << "Оператор присваивания(Вызывается описания user5, который имеет такие же данные как user2)" << endl;
+    User user5;
+    user5 = user2; // Оператор присваивания
+    user5.print_user();
+
+    // Статическая функция показывающая кол-во уникальных пользователей
     cout << "Количество созданных юзеров: " << user1.getUserCount() << endl;
+
+    // Работа с std::string
+    cout << endl << "Некоторые методы std::string" << endl;
+    cout << user1.getFullNameWithId() << endl;
+    cout << user1.containsName("Dima") << endl;
 
     return 0;
 }
