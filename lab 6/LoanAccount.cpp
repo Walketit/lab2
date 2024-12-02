@@ -20,8 +20,9 @@ void LoanAccount::makePayment(double amount) {
     }
 }
 
-void LoanAccount::print_account(){
-    Account::print_account(); // Вызов метода базового класса
+void LoanAccount::displayDetails() const
+{
+    Account::displayDetails(); // Вызов метода базового класса
     cout << "Сумма задолжности: " << loanAmount << endl;
     cout << "Процентная ставка: " << interestRate << "%" << endl;
     cout << "Месячная плата: " << monthlyPayment << endl;

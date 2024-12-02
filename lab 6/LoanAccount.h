@@ -17,7 +17,7 @@ public:
     void makePayment(double amount); // Сделать платеж по кредиту.
     void calculationOfInterest(); // Ежедневное добавление процентов
 
-    void print_account(); // Перегрузка метода базового класса
+    void displayDetails() const override; // Переопределение виртуальной функции
     void print_account_without_base(); // Перегрузка без вызова метода базового класса
 
 

@@ -29,9 +29,14 @@ void Account::create_account(string acc_name, string acc_currency, double initia
     currency = acc_currency;
 }
 
-void Account::print_account() const {
+void Account::displayDetails() const
+{
     cout << "Название счета: " << name << endl;
     cout << "Баланс: " << fixed << setprecision(2) << balance << " " << currency << endl;
+}
+
+void Account::print_account() const {
+    displayDetails();
 }
 
 void Account::deposit(double amount) {

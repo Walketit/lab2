@@ -35,5 +35,24 @@ int main()
     cout << "\nLoan Account Details after assignment:" << endl;
     loanAccount.print_account();
 
+
+    ///
+    ///
+    /// 
+    ///
+    ///
+
+    cout << "Base Account Details:" << endl;
+    baseAccount.print_account(); // Вызов виртуальной функции через не виртуальную функцию базового класса
+
+    cout << "\nLoan Account Details before assignment:" << endl;
+    loanAccount.print_account(); // Вызов виртуальной функции через не виртуальную функцию производного класса
+
+    Account* accountPtr = &loanAccount; // Присваивание указателя на базовый класс указателю на производный класс
+
+    cout << "\nLoan Account Details after assignment (via base class pointer):" << endl;
+    accountPtr->print_account(); // Вызов виртуальной функции через указатель на базовый класс
+
+
     return 0;
 }
