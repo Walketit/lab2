@@ -66,6 +66,7 @@ void LoanAccount::setMonthlyPayment(double monthlyPayment) {
     this->monthlyPayment = monthlyPayment;
 }
 
+//  перегрузка оператора присваивания объекту производного класса объектов базового класса
 LoanAccount& LoanAccount::operator=(const Account& other) {
     if (this == &other) {
         return *this;
