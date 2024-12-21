@@ -3,11 +3,10 @@
 
 #include <string>
 #include <iostream>
-#include "FileCreator.h"
 
 using namespace std;
 
-class Note : public FileCreator {
+class Note {
 private:
     string title;        // Заголовок заметки
     string content;      // Содержание заметки
@@ -22,9 +21,6 @@ public:
     void setTitle(const string& title);
     void setDescription(const string& description);
     void setCategory(const string& category);
-
-    void saveToFile(const string& filename) const override;
-    void loadFromFile(const string& filename) override;
 };
 
 #endif // NOTE_H

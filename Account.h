@@ -10,7 +10,7 @@ using namespace std;
 class User;
 
 class Account {
-private:
+protected:
     int id;                 // Уникальный идентификатор счета
     string name;            // Название счета
     string currency;        // Валюта счета (например, "USD", "EUR", "RUB")
@@ -22,8 +22,10 @@ public:
     Account(const Account& other); // Конструктор копии
     Account& operator=(const Account& other); // Оператор присваивания
 
+    virtual void displayDetails() const; // Виртуальная функция
+    void print_account() const; // Не виртуальная функция
+
     void create_account(string acc_name, string acc_currency, double initial_balance);
-    void print_account() const;
     void deposit(double amount);
     void withdraw(double amount);
     void setBalance(double balance);
@@ -37,6 +39,7 @@ public:
 
     // Делаем класс User дружественным для данного класса
     friend class User;
+
 };
 
 #endif // ACCOUNT_H

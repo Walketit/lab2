@@ -31,3 +31,44 @@ void Goal::setTitle(const string& title) { this->name = name; }
 void Goal::setDescription(const string& description) { this->description = description; }
 void Goal::setCurrentBalance(double currentBalance) { this->current_amount = current_amount; }
 void Goal::setTargetAmount(double targetAmount) { this->target_amount = target_amount; }
+
+void Goal::saveToFile(const string& filename) const
+{
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Ошибка при открытии файла для записи: " << filename << endl;
+        return;
+    }
+    file << "{\n";
+    file << "  \"Goal\": {\n";
+    file << "    \"Name\": \"" << name << "\",\n";
+    file << "    \"Description\": \"" << description << "\",\n";
+    file << "    \"TargetAmount\": " << target_amount << ",\n";
+    file << "    \"CurrentAmount\": " << current_amount << "\n";
+    file << "  }\n";
+    file << "}\n";
+    file.close();
+    cout << "Цель успешно сохранена в JSON файл: " << filename << endl;
+}
+
+void Goal::loadFromFile(const string& filename)
+{
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Ошибка при открытии файла для чтения: " << filename << endl;
+        return;
+    }
+    string line;
+    getline(file, line); // Пропускаем первую строку "{"
+    getline(file, line); // Пропускаем строку "  \"Goal\": {"
+    getline(file, line);
+    name = line.substr(line.find(": \"") + 3, line.rfind("\"") - (line.find(": \"") + 3)); // Извлекаем "Name"
+    getline(file, line);
+    description = line.substr(line.find(": \"") + 3, line.rfind("\"") - (line.find(": \"") + 3)); // Извлекаем "Description"
+    getline(file, line);
+    target_amount = stod(line.substr(line.find(": ") + 2)); // Извлекаем "TargetAmount"
+    getline(file, line);
+    current_amount = stod(line.substr(line.find(": ") + 2)); // Извлекаем "CurrentAmount"
+    file.close();
+    cout << "Цель успешно загружена из JSON файла: " << filename << endl;
+}

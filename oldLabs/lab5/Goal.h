@@ -4,11 +4,10 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
-#include "FileCreator.h"
 
 using namespace std;
 
-class Goal : public FileCreator {
+class Goal {
 private:
     string name;         // Название цели
     string description;  // Описание цели
@@ -28,10 +27,6 @@ public:
     void setDescription(const string& description);
     void setCurrentBalance(double currentBalance);
     void setTargetAmount(double targetAmount);
-
-    void saveToFile(const string& filename) const override;
-    void loadFromFile(const string& filename) override;
-
 };
 
 #endif // GOAL_H
