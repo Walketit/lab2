@@ -20,11 +20,11 @@ void Accounts::findByName(const string& name)
 		});
 
 	if (it != Accounts.end()) {
-		cout << "\nAccount found:" << endl;
+		cout << "\nАккаунт найден:" << endl;
 		(*it)->displayDetails();
 	}
 	else {
-		cout << "\nAccount with name '" << name << "' not found." << endl;
+		cout << "\nАккаунт с названием '" << name << "' не найден." << endl;
 	}
 }
 

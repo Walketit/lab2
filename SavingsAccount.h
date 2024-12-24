@@ -18,7 +18,7 @@ public:
     SavingsAccount(string acc_name, double initial_balance, string acc_currency, double interestRate, int savingsFrequency)
         : Account(acc_name, initial_balance, acc_currency), // Вызов конструктора базового класса
         interestRate(interestRate), savingsFrequency(savingsFrequency) {
-        cout << "SavingsAccount: Конструктор с параметрами вызван" << endl;
+        
     }
 
     // Методы

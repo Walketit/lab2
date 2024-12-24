@@ -11,7 +11,6 @@ void SavingsAccount::applyInterest()
 
 void SavingsAccount::displayDetails() const
 {
-	cout << "=== С вызовом метода базового класса ===" << endl;
 	Account::displayDetails(); // Вызов метода базового класса
 	cout << "Процентная ставка: " << fixed << setprecision(2) << interestRate << "%\n"
 		<< "Частота начисления: " << savingsFrequency << " раз(а) в год" << endl;
@@ -19,7 +18,6 @@ void SavingsAccount::displayDetails() const
 
 void SavingsAccount::displayDetailsWithoutBase() const
 {
-	cout << "=== Без вызова метода базового класса ===" << endl;
 	cout << "Счет: " << name << endl
 		<< "Валюта: " << currency << endl
 		<< "Баланс: " << fixed << setprecision(2) << balance << " " << currency << endl;
